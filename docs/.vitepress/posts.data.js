@@ -1,7 +1,7 @@
 import { createContentLoader } from 'vitepress'
 
 // 在构建时扫描 docs/posts 下的所有 .md，收集标题/日期/标签
-export default createContentLoader('posts/*.md', {
+export default createContentLoader('posts/**/*.md', {
   transform(raw) {
     return raw
       .map(({ url, frontmatter }) => ({

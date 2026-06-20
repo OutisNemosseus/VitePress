@@ -1,0 +1,46 @@
+[
+  {
+    "text": "Python",
+    "collapsed": false,
+    "items": [
+      {
+        "text": "Quicksort",
+        "link": "/posts/python/quicksort"
+      }
+    ]
+  },
+  {
+    "text": "Java",
+    "collapsed": false,
+    "items": [
+      {
+        "text": "Greeter",
+        "link": "/posts/java/greeter"
+      }
+    ]
+  },
+  {
+    "text": "C",
+    "collapsed": false,
+    "items": [
+      {
+        "text": "Hello",
+        "link": "/posts/c/hello"
+      }
+    ]
+  },
+  {
+    "text": "随笔",
+    "collapsed": false,
+    "items": [
+      {
+        "text": "单调栈 · 接雨水",
+        "link": "/posts/monotonic-stack"
+      },
+      {
+        "text": "设计模式 · 策略模式",
+        "link": "/posts/design-pattern-strategy"
+      }
+    ]
+  }
+]

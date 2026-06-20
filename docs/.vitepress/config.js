@@ -1,4 +1,13 @@
 import { defineConfig } from 'vitepress'
+import fs from 'node:fs'
+
+// 由 scripts/generate-posts.mjs 自动生成的、按语言分组的文章侧边栏
+let postsSidebar = []
+try {
+  postsSidebar = JSON.parse(
+    fs.readFileSync(new URL('./generated-sidebar.json', import.meta.url), 'utf8')
+  )
+} catch {}
 
 export default defineConfig({
   title: '我的文档',
@@ -15,15 +24,7 @@ export default defineConfig({
       '/guide/': [
         { text: '介绍', link: '/guide/' }
       ],
-      '/posts/': [
-        {
-          text: '文章',
-          items: [
-            { text: '单调栈 · 接雨水', link: '/posts/monotonic-stack' },
-            { text: '策略模式', link: '/posts/design-pattern-strategy' }
-          ]
-        }
-      ]
+      '/posts/': postsSidebar
     },
     socialLinks: [
       { icon: 'github', link: 'https://github.com/OutisNemosseus/VitePress' }
