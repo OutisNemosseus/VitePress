@@ -12,7 +12,13 @@ const POSTS_DIR = path.join(root, 'docs', 'posts')
 // 支持的语言映射：扩展名 → { Monaco 语言 id, 标签名 }
 const LANG = {
   '.py': { language: 'python', label: 'Python' },
-  '.java': { language: 'java', label: 'Java' }
+  '.java': { language: 'java', label: 'Java' },
+  '.c': { language: 'c', label: 'C' },
+  '.h': { language: 'c', label: 'C' },
+  '.cpp': { language: 'cpp', label: 'C++' },
+  '.cc': { language: 'cpp', label: 'C++' },
+  '.cxx': { language: 'cpp', label: 'C++' },
+  '.hpp': { language: 'cpp', label: 'C++' }
 }
 
 const pad = n => String(n).padStart(2, '0')
@@ -32,12 +38,16 @@ const files = fs
   .readdirSync(SOURCE_DIR)
   .filter(f => LANG[path.extname(f).toLowerCase()])
 
+const usedSlugs = new Set()
 let count = 0
 for (const file of files) {
   const ext = path.extname(file).toLowerCase()
   const { language, label } = LANG[ext]
   const base = path.basename(file, ext)
-  const slug = slugify(base)
+  // 同名 .c/.h 之类会撞车，撞到就加扩展名后缀（alt-functions vs alt-functions-h）
+  let slug = slugify(base)
+  if (usedSlugs.has(slug)) slug = `${slug}-${ext.slice(1)}`
+  usedSlugs.add(slug)
   const outPath = path.join(POSTS_DIR, `${slug}.md`)
 
   const content = fs.readFileSync(path.join(SOURCE_DIR, file), 'utf8')
