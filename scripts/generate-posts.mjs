@@ -69,6 +69,50 @@ function walkMd(dir) {
 // 独立的 Monaco 全屏 HTML 页（VS Code 风格），从 CDN 加载编辑器内核
 function buildMonacoHtml(filename, code, lang, label) {
   const codeJs = JSON.stringify(code).replace(/<\/script>/gi, '<\\/script>')
+
+  // 只有 Python 能在浏览器里跑（Pyodide / WebAssembly）
+  const isPython = lang === 'python'
+  const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/'
+  const runBtn = isPython
+    ? `<button class="btn btn-run" id="runBtn" onclick="runCode()">&#9654; Run</button>`
+    : ''
+  const outputPanel = isPython
+    ? `<div id="output">
+  <div class="out-bar"><span>Output</span><button class="out-clear" onclick="clearOut()">Clear</button></div>
+  <pre id="outBody"></pre>
+</div>`
+    : ''
+  const pyScript = isPython
+    ? `<script>
+const PYODIDE='${PYODIDE}';
+let pyReady=null;
+function showOut(){document.getElementById('output').style.display='flex';if(ED)ED.layout();}
+function setOut(t){document.getElementById('outBody').textContent=t;}
+function appendOut(t){var o=document.getElementById('outBody');o.textContent+=t;o.scrollTop=o.scrollHeight;}
+function clearOut(){setOut('');}
+function ensurePy(){
+  if(pyReady)return pyReady;
+  showOut();setOut('\\u23F3 Loading Python runtime (first run downloads ~10MB)...');
+  pyReady=new Promise((res,rej)=>{var s=document.createElement('script');s.src=PYODIDE+'pyodide.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);})
+    .then(()=>loadPyodide({indexURL:PYODIDE}));
+  return pyReady;
+}
+async function runCode(){
+  var b=document.getElementById('runBtn');b.disabled=true;var t=b.textContent;b.textContent='Running...';
+  showOut();
+  try{
+    var py=await ensurePy();
+    setOut('');
+    var write=s=>appendOut(s.endsWith('\\n')?s:s+'\\n');
+    py.setStdout({batched:write});py.setStderr({batched:write});
+    await py.runPythonAsync(current());
+    if(!document.getElementById('outBody').textContent)appendOut('(no output)');
+  }catch(e){appendOut('\\n'+e);}
+  finally{b.disabled=false;b.textContent=t;}
+}
+<\/script>`
+    : ''
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,7 +132,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-copy{background:#0e639c}.btn-copy:hover{background:#1177bb}.btn-copy.copied{background:#16825d}
 .btn-dl{background:#10b981}.btn-dl:hover{background:#059669}
 .btn-reset{background:#6b7280}.btn-reset:hover{background:#7c8493}
-#editor{height:calc(100vh - 52px)}
+.btn-run{background:#7c3aed}.btn-run:hover{background:#8b5cf6}
+.btn:disabled{opacity:.6;cursor:default}
+body{display:flex;flex-direction:column}
+.header{flex:0 0 auto}
+#editor{flex:1 1 auto;min-height:0}
+#output{display:none;flex-direction:column;height:220px;flex:0 0 auto;border-top:1px solid #3c3c3c;background:#1e1e1e}
+.out-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:#252526;border-bottom:1px solid #3c3c3c;font-size:.8rem;color:#cbd5e1}
+.out-clear{background:#374151;color:#fff;border:none;border-radius:4px;padding:3px 10px;font-size:.75rem;cursor:pointer}
+#outBody{margin:0;padding:12px 16px;overflow:auto;flex:1;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;white-space:pre-wrap;color:#d4d4d4}
 </style>
 </head>
 <body>
@@ -98,9 +150,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="btn btn-copy" id="copyBtn" onclick="copyCode()">Copy</button>
     <button class="btn btn-dl" onclick="downloadCode()">Download</button>
     <button class="btn btn-reset" onclick="resetCode()">Reset</button>
+    ${runBtn}
   </div>
 </div>
 <div id="editor"></div>
+${outputPanel}
 <script src="${MONACO}/loader.min.js"><\/script>
 <script>
 const CODE=${codeJs};
@@ -121,6 +175,7 @@ function copyCode(){navigator.clipboard.writeText(current()).then(()=>{const b=d
 function downloadCode(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([current()],{type:'text/plain'}));a.download=FILENAME;a.click();}
 function resetCode(){if(ED)ED.setValue(CODE);}
 <\/script>
+${pyScript}
 </body>
 </html>`
 }
