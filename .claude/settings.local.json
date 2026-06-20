@@ -5,7 +5,12 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git branch *)",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "Bash(gh auth *)",
+      "Bash(git push *)",
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   }
 }
