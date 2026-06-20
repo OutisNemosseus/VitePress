@@ -3,6 +3,8 @@ title: Hello
 date: 2026-06-20
 tags:
   - C
+  - 入门
+  - 循环
 source: hello.c
 ---
 
@@ -14,4 +16,13 @@ import { withBase } from 'vitepress'
 
 > 由 `source/hello.c` 自动生成 · C
 
-<iframe :src="withBase('/code-pages/c/hello.html')" width="100%" height="940px" style="border:1px solid #3c3c3c;border-radius:8px" title="hello.c - Monaco Editor"></iframe>
+::: tip 题目
+用 for 循环打印三次问候语，熟悉 printf 与计数循环。
+:::
+
+<details class="code-fold">
+<summary>📄 显示 / 隐藏代码</summary>
+
+<iframe :src="withBase('/code-pages/c/hello.html')" width="100%" height="964px" style="border:1px solid #3c3c3c;border-radius:8px" title="hello.c - Monaco Editor"></iframe>
+
+</details>

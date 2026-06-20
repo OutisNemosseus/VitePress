@@ -55,6 +55,29 @@ function parseTagsFromComments(content) {
     .filter(Boolean)
 }
 
+// 从源文件注释里提取「题目」描述。
+// 在注释里写：题目: ... （或 problem: / question:），可单行，也可接续多行注释。
+function parseProblemFromComments(content) {
+  const lines = content.split('\n')
+  let start = -1
+  let first = ''
+  for (let i = 0; i < Math.min(lines.length, 40); i++) {
+    const m = lines[i].match(/^\s*(?:#|\/\/|\*|\/\*)\s*(?:题目|题|problem|question)\s*[:：]\s*(.*)$/i)
+    if (m) { start = i; first = m[1]; break }
+  }
+  if (start === -1) return ''
+  const out = []
+  if (first.trim()) out.push(first.trim())
+  for (let i = start + 1; i < lines.length; i++) {
+    const raw = lines[i]
+    if (!/^\s*(?:#|\/\/|\*|\/\*|\*\/)/.test(raw)) break          // 注释块结束
+    const stripped = raw.replace(/^\s*(?:#|\/\/|\*\/|\/\*|\*)\s?/, '').replace(/\*\/\s*$/, '')
+    if (/^\s*(?:tags|标签|keywords|关键词)\s*[:：]/i.test(stripped)) break  // 碰到别的指令就停
+    out.push(stripped)
+  }
+  return out.join('\n').trim()
+}
+
 function walkMd(dir) {
   if (!fs.existsSync(dir)) return []
   const out = []
@@ -73,9 +96,6 @@ function buildMonacoHtml(filename, code, lang, label) {
   // 只有 Python 能在浏览器里跑（Pyodide / WebAssembly）
   const isPython = lang === 'python'
   const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/'
-  const runBtn = isPython
-    ? `<button class="btn btn-run" id="runBtn" onclick="runCode()" title="Ctrl+Enter">&#9654; Run (Ctrl+Enter)</button>`
-    : ''
   const outputPanel = isPython
     ? `<div id="output">
   <div class="out-bar"><span>Output</span><button class="out-clear" onclick="clearOut()">Clear</button></div>
@@ -107,11 +127,13 @@ async function runCode(){
     py.setStdout({batched:write});py.setStderr({batched:write});
     // input() 支持：弹窗输入一行，并回显到输出
     py.setStdin({stdin:()=>{var r=window.prompt('input():');if(r===null)return '';appendOut('> '+r+'\\n');return r+'\\n';}});
-    await py.runPythonAsync(current());
+    await py.runPythonAsync(getCode());
     if(!document.getElementById('outBody').textContent)appendOut('(no output)');
   }catch(e){appendOut('\\n'+e);}
   finally{b.disabled=false;b.textContent=t;}
 }
+// 注册「运行」按钮（解耦：只需在这里加一条）
+registerAction({id:'run',cls:'btn-run',label:'&#9654; Run (Ctrl+Enter)',title:'Ctrl+Enter',run:function(){runCode();}});
 <\/script>`
     : ''
 
@@ -148,12 +170,7 @@ body{display:flex;flex-direction:column}
 <body>
 <div class="header">
   <div><span class="filename">${filename}</span><span class="file-type">${label}</span><span class="lines" id="lines"></span></div>
-  <div class="actions">
-    <button class="btn btn-copy" id="copyBtn" onclick="copyCode()">Copy</button>
-    <button class="btn btn-dl" onclick="downloadCode()">Download</button>
-    <button class="btn btn-reset" onclick="resetCode()">Reset</button>
-    ${runBtn}
-  </div>
+  <div class="actions"></div>
 </div>
 <div id="editor"></div>
 ${outputPanel}
@@ -173,11 +190,29 @@ require(['vs/editor/editor.main'],function(){
   ED.onDidChangeModelContent(()=>{document.getElementById('lines').textContent=ED.getValue().split('\\n').length+' lines';});
   // Ctrl/Cmd + Enter 运行（仅 Python 页有 runCode）
   ED.addCommand(monaco.KeyMod.CtrlCmd|monaco.KeyCode.Enter,function(){if(typeof runCode==='function')runCode();});
+  mountActions();
 });
-function current(){return ED?ED.getValue():CODE;}
-function copyCode(){navigator.clipboard.writeText(current()).then(()=>{const b=document.getElementById('copyBtn');b.classList.add('copied');b.textContent='Copied!';setTimeout(()=>{b.classList.remove('copied');b.textContent='Copy';},1500);});}
-function downloadCode(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([current()],{type:'text/plain'}));a.download=FILENAME;a.click();}
-function resetCode(){if(ED)ED.setValue(CODE);}
+function getCode(){return ED?ED.getValue():CODE;}
+function setCode(v){if(ED)ED.setValue(v);}
+// ===== 按钮「稳定骨架」：注册表 + 统一挂载。日后加按钮只需 registerAction({...}) 一行 =====
+const ACTIONS=[];
+function registerAction(a){ACTIONS.push(a);}
+function mountActions(){
+  var box=document.querySelector('.actions');box.innerHTML='';
+  ACTIONS.forEach(function(a){
+    var b=document.createElement('button');
+    b.className='btn '+(a.cls||'');
+    if(a.id)b.id=a.id+'Btn';
+    if(a.title)b.title=a.title;
+    b.innerHTML=a.label;
+    b.addEventListener('click',function(){a.run({btn:b,getCode:getCode,setCode:setCode,editor:ED});});
+    box.appendChild(b);
+  });
+}
+// 核心按钮（业务回调只管自己的事，与骨架解耦）
+registerAction({id:'copy',cls:'btn-copy',label:'Copy',run:function(ctx){navigator.clipboard.writeText(ctx.getCode()).then(function(){ctx.btn.classList.add('copied');ctx.btn.textContent='Copied!';setTimeout(function(){ctx.btn.classList.remove('copied');ctx.btn.textContent='Copy';},1500);});}});
+registerAction({id:'download',cls:'btn-dl',label:'Download',run:function(ctx){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ctx.getCode()],{type:'text/plain'}));a.download=FILENAME;a.click();}});
+registerAction({id:'reset',cls:'btn-reset',label:'Reset',run:function(ctx){ctx.setCode(CODE);}});
 <\/script>
 ${pyScript}
 </body>
@@ -218,6 +253,11 @@ for (const file of files) {
   const tags = [label, ...customTags].filter((t, i, a) => a.indexOf(t) === i)
   const tagsYaml = tags.map(t => `  - ${t}`).join('\n')
 
+  // 题目（从注释提取）；代码默认展开规则：Python 展开，其它语言收起
+  const problem = parseProblemFromComments(content)
+  const problemBlock = problem ? `::: tip 题目\n${problem}\n:::\n\n` : ''
+  const openAttr = language === 'python' ? ' open' : ''
+
   // 2a) 独立 Monaco HTML 页 → docs/public/code-pages/<dir>/<slug>.html
   const htmlDir = path.join(CODE_PAGES_DIR, dir)
   fs.mkdirSync(htmlDir, { recursive: true })
@@ -244,7 +284,12 @@ import { withBase } from 'vitepress'
 
 > 由 \`source/${file}\` 自动生成 · ${label}
 
+${problemBlock}<details class="code-fold"${openAttr}>
+<summary>📄 显示 / 隐藏代码</summary>
+
 <iframe :src="withBase('${htmlRel}')" width="100%" height="${height}px" style="border:1px solid #3c3c3c;border-radius:8px" title="${file} - Monaco Editor"></iframe>
+
+</details>
 `
   fs.writeFileSync(path.join(outDir, `${slug}.md`), md, 'utf8')
   count++

@@ -31,12 +31,7 @@ body{display:flex;flex-direction:column}
 <body>
 <div class="header">
   <div><span class="filename">strategy_pattern.py</span><span class="file-type">Python</span><span class="lines" id="lines"></span></div>
-  <div class="actions">
-    <button class="btn btn-copy" id="copyBtn" onclick="copyCode()">Copy</button>
-    <button class="btn btn-dl" onclick="downloadCode()">Download</button>
-    <button class="btn btn-reset" onclick="resetCode()">Reset</button>
-    <button class="btn btn-run" id="runBtn" onclick="runCode()" title="Ctrl+Enter">&#9654; Run (Ctrl+Enter)</button>
-  </div>
+  <div class="actions"></div>
 </div>
 <div id="editor"></div>
 <div id="output">
@@ -59,11 +54,29 @@ require(['vs/editor/editor.main'],function(){
   ED.onDidChangeModelContent(()=>{document.getElementById('lines').textContent=ED.getValue().split('\n').length+' lines';});
   // Ctrl/Cmd + Enter 运行（仅 Python 页有 runCode）
   ED.addCommand(monaco.KeyMod.CtrlCmd|monaco.KeyCode.Enter,function(){if(typeof runCode==='function')runCode();});
+  mountActions();
 });
-function current(){return ED?ED.getValue():CODE;}
-function copyCode(){navigator.clipboard.writeText(current()).then(()=>{const b=document.getElementById('copyBtn');b.classList.add('copied');b.textContent='Copied!';setTimeout(()=>{b.classList.remove('copied');b.textContent='Copy';},1500);});}
-function downloadCode(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([current()],{type:'text/plain'}));a.download=FILENAME;a.click();}
-function resetCode(){if(ED)ED.setValue(CODE);}
+function getCode(){return ED?ED.getValue():CODE;}
+function setCode(v){if(ED)ED.setValue(v);}
+// ===== 按钮「稳定骨架」：注册表 + 统一挂载。日后加按钮只需 registerAction({...}) 一行 =====
+const ACTIONS=[];
+function registerAction(a){ACTIONS.push(a);}
+function mountActions(){
+  var box=document.querySelector('.actions');box.innerHTML='';
+  ACTIONS.forEach(function(a){
+    var b=document.createElement('button');
+    b.className='btn '+(a.cls||'');
+    if(a.id)b.id=a.id+'Btn';
+    if(a.title)b.title=a.title;
+    b.innerHTML=a.label;
+    b.addEventListener('click',function(){a.run({btn:b,getCode:getCode,setCode:setCode,editor:ED});});
+    box.appendChild(b);
+  });
+}
+// 核心按钮（业务回调只管自己的事，与骨架解耦）
+registerAction({id:'copy',cls:'btn-copy',label:'Copy',run:function(ctx){navigator.clipboard.writeText(ctx.getCode()).then(function(){ctx.btn.classList.add('copied');ctx.btn.textContent='Copied!';setTimeout(function(){ctx.btn.classList.remove('copied');ctx.btn.textContent='Copy';},1500);});}});
+registerAction({id:'download',cls:'btn-dl',label:'Download',run:function(ctx){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ctx.getCode()],{type:'text/plain'}));a.download=FILENAME;a.click();}});
+registerAction({id:'reset',cls:'btn-reset',label:'Reset',run:function(ctx){ctx.setCode(CODE);}});
 </script>
 <script>
 const PYODIDE='https://cdn.jsdelivr.net/pyodide/v0.26.2/full/';
@@ -89,11 +102,13 @@ async function runCode(){
     py.setStdout({batched:write});py.setStderr({batched:write});
     // input() 支持：弹窗输入一行，并回显到输出
     py.setStdin({stdin:()=>{var r=window.prompt('input():');if(r===null)return '';appendOut('> '+r+'\n');return r+'\n';}});
-    await py.runPythonAsync(current());
+    await py.runPythonAsync(getCode());
     if(!document.getElementById('outBody').textContent)appendOut('(no output)');
   }catch(e){appendOut('\n'+e);}
   finally{b.disabled=false;b.textContent=t;}
 }
+// 注册「运行」按钮（解耦：只需在这里加一条）
+registerAction({id:'run',cls:'btn-run',label:'&#9654; Run (Ctrl+Enter)',title:'Ctrl+Enter',run:function(){runCode();}});
 </script>
 </body>
 </html>

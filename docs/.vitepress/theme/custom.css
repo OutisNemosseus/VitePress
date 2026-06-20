@@ -44,6 +44,27 @@
   color: #fff;
 }
 
+/* 代码折叠块：把 <summary> 做成按钮 */
+.code-fold {
+  margin: 16px 0;
+}
+.code-fold > summary {
+  cursor: pointer;
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+  font-size: 14px;
+  list-style: none;
+  user-select: none;
+  margin-bottom: 12px;
+}
+.code-fold > summary::-webkit-details-marker { display: none; }
+.code-fold > summary::before { content: '▸ '; }
+.code-fold[open] > summary::before { content: '▾ '; }
+
 /* /tags 页面：工具栏（全部 + 模式切换） */
 .tag-toolbar {
   display: flex;
