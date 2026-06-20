@@ -10,7 +10,11 @@
       "Bash(git push *)",
       "Bash(npm --version)",
       "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://OutisNemosseus.github.io/VitePress/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://OutisNemosseus.github.io/VitePress/tags.html)",
+      "Bash(curl -s https://OutisNemosseus.github.io/VitePress/)",
+      "Bash(git fetch *)"
     ]
   }
 }
