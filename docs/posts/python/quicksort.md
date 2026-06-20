@@ -14,4 +14,4 @@ import { withBase } from 'vitepress'
 
 > 由 `source/quicksort.py` 自动生成 · Python
 
-<iframe :src="withBase('/code-pages/python/quicksort.html')" width="100%" height="406px" style="border:1px solid #3c3c3c;border-radius:8px" title="quicksort.py - Monaco Editor"></iframe>
+<iframe :src="withBase('/code-pages/python/quicksort.html')" width="100%" height="1036px" style="border:1px solid #3c3c3c;border-radius:8px" title="quicksort.py - Monaco Editor"></iframe>

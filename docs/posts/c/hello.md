@@ -14,4 +14,4 @@ import { withBase } from 'vitepress'
 
 > 由 `source/hello.c` 自动生成 · C
 
-<iframe :src="withBase('/code-pages/c/hello.html')" width="100%" height="330px" style="border:1px solid #3c3c3c;border-radius:8px" title="hello.c - Monaco Editor"></iframe>
+<iframe :src="withBase('/code-pages/c/hello.html')" width="100%" height="940px" style="border:1px solid #3c3c3c;border-radius:8px" title="hello.c - Monaco Editor"></iframe>

@@ -139,7 +139,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 body{display:flex;flex-direction:column}
 .header{flex:0 0 auto}
 #editor{flex:1 1 auto;min-height:0}
-#output{display:none;flex-direction:column;height:220px;flex:0 0 auto;border-top:1px solid #3c3c3c;background:#1e1e1e}
+#output{display:none;flex-direction:column;height:140px;flex:0 0 auto;border-top:1px solid #3c3c3c;background:#1e1e1e}
 .out-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:#252526;border-bottom:1px solid #3c3c3c;font-size:.8rem;color:#cbd5e1}
 .out-clear{background:#374151;color:#fff;border:none;border-radius:4px;padding:3px 10px;font-size:.75rem;cursor:pointer}
 #outBody{margin:0;padding:12px 16px;overflow:auto;flex:1;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;white-space:pre-wrap;color:#d4d4d4}
@@ -211,7 +211,7 @@ for (const file of files) {
 
   const content = fs.readFileSync(path.join(SOURCE_DIR, file), 'utf8')
   const lineCount = content.split('\n').length
-  const height = Math.min(Math.max(lineCount * 19 + 140, 320), 820)
+  const height = Math.min(Math.max(lineCount * 24 + 700, 700), 1600)
 
   // 标签 = 语言名 + 注释里手写的关键词（去重）
   const customTags = parseTagsFromComments(content)
