@@ -44,6 +44,38 @@
   color: #fff;
 }
 
+/* /tags 页面：工具栏（全部 + 模式切换） */
+.tag-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+.tag-mode {
+  display: inline-flex;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.mode-btn {
+  padding: 5px 12px;
+  font-size: 13px;
+  border: none;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+}
+.mode-btn.active {
+  background: var(--vp-c-brand-1);
+  color: #fff;
+}
+.tag-result {
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+  margin: 12px 0 0;
+}
+
 /* /tags 页面的文章列表 */
 .post-list {
   list-style: none;
