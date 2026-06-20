@@ -22,7 +22,8 @@ export default defineConfig({
     ],
     sidebar: {
       '/guide/': [
-        { text: '介绍', link: '/guide/' }
+        { text: '介绍', link: '/guide/' },
+        { text: '设计模式与开闭原则', link: '/guide/design-patterns' }
       ],
       '/posts/': postsSidebar
     },
