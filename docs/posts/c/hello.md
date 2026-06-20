@@ -5,6 +5,8 @@ tags:
   - C
   - 入门
   - 循环
+  - include
+  - <stdio.h>
 source: hello.c
 ---
 

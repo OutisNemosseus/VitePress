@@ -41,41 +41,72 @@ const prettify = name =>
 const slugify = name =>
   name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
-// 从源文件头部注释里读关键词，生成标签。
-// 支持任意注释符号（# // *）后写：tags / 标签 / keywords / 关键词，分隔符可用 , ， 、 空格
-// 例：  # tags: 算法, 单调栈, 双指针      //  // keywords: recursion sorting
-function parseTagsFromComments(content) {
-  const head = content.split('\n').slice(0, 20).join('\n')
-  const m = head.match(/(?:#|\/\/|\*|--)\s*(?:tags|标签|keywords|关键词)\s*[:：]\s*(.+)/i)
-  if (!m) return []
-  return m[1]
-    .replace(/\*\/\s*$/, '')          // 去掉块注释结尾 */
-    .split(/[,，、;；\s]+/)
-    .map(s => s.trim())
-    .filter(Boolean)
-}
+// ============================================================
+// 注释指令系统（符合开闭原则：加一种区块 = 在 SECTIONS 加一行）
+// ============================================================
 
-// 从源文件注释里提取「题目」描述。
-// 在注释里写：题目: ... （或 problem: / question:），可单行，也可接续多行注释。
-function parseProblemFromComments(content) {
+// 标签指令名（tags / 标签 / keywords / 关键词）
+const TAG_NAMES = 'tags|标签|keywords|关键词'
+
+// 区块注册表：在注释里写「title: 内容」就会渲染成对应的提示框。
+// 想新增区块（如“复杂度”“来源”），只要在这里加一行，无需改任何解析/渲染逻辑。
+//   names     ：可触发该区块的关键词（| 分隔，大小写不限）
+//   title     ：渲染出来的标题
+//   container ：VitePress 容器样式 tip(绿) / warning(黄) / danger(红) / info(灰)
+const SECTIONS = [
+  { names: '题目|题|problem|question', title: '题目',   container: 'tip' },
+  { names: '错误|错误处|踩坑|mistake|bug', title: '错误处', container: 'warning' },
+  { names: '遗忘|遗忘处|易忘|forgot', title: '遗忘处', container: 'danger' },
+  { names: '延展|拓展|相关|相关题|related', title: '延展',   container: 'info' }
+]
+
+// 所有指令名合集——用于判断“某行是不是另一条指令”，从而界定区块边界
+const ALL_DIRECTIVES = [TAG_NAMES, ...SECTIONS.map(s => s.names)].join('|')
+
+const isCommentLine = line => /^\s*(?:#|\/\/|\*|\/\*|\*\/)/.test(line)
+const stripComment = line =>
+  line.replace(/^\s*(?:#|\/\/|\*\/|\/\*|\*)\s?/, '').replace(/\*\/\s*$/, '')
+const isDirectiveLine = stripped =>
+  new RegExp(`^\\s*(?:${ALL_DIRECTIVES})\\s*[:：]`, 'i').test(stripped)
+// 分隔线（==== ---- **** 之类的装饰），用于界定区块结尾
+const isSeparator = stripped => /^[=\-*_~#\s]{3,}$/.test(stripped)
+
+// 通用区块解析器：按指令名提取一段（单行或多行注释），碰到别的指令/非注释行就停
+function parseSection(content, names) {
   const lines = content.split('\n')
+  const re = new RegExp(`^\\s*(?:#|//|\\*|/\\*)\\s*(?:${names})\\s*[:：]\\s*(.*)$`, 'i')
   let start = -1
   let first = ''
-  for (let i = 0; i < Math.min(lines.length, 40); i++) {
-    const m = lines[i].match(/^\s*(?:#|\/\/|\*|\/\*)\s*(?:题目|题|problem|question)\s*[:：]\s*(.*)$/i)
+  for (let i = 0; i < Math.min(lines.length, 60); i++) {
+    const m = lines[i].match(re)
     if (m) { start = i; first = m[1]; break }
   }
   if (start === -1) return ''
   const out = []
   if (first.trim()) out.push(first.trim())
   for (let i = start + 1; i < lines.length; i++) {
-    const raw = lines[i]
-    if (!/^\s*(?:#|\/\/|\*|\/\*|\*\/)/.test(raw)) break          // 注释块结束
-    const stripped = raw.replace(/^\s*(?:#|\/\/|\*\/|\/\*|\*)\s?/, '').replace(/\*\/\s*$/, '')
-    if (/^\s*(?:tags|标签|keywords|关键词)\s*[:：]/i.test(stripped)) break  // 碰到别的指令就停
-    out.push(stripped)
+    if (!isCommentLine(lines[i])) break  // 注释块结束
+    const s = stripComment(lines[i])
+    if (s.trim() === '') break           // 空注释行
+    if (isSeparator(s)) break            // 分隔线 ==== ----
+    if (isDirectiveLine(s)) break        // 碰到别的指令（含其它区块/标签）就停
+    out.push(s)
   }
   return out.join('\n').trim()
+}
+
+// 标签：复用通用解析器拿到那一段，再切成数组
+function parseTagsFromComments(content) {
+  const raw = parseSection(content, TAG_NAMES)
+  return raw.split(/[,，、;；\s]+/).map(s => s.trim()).filter(Boolean)
+}
+
+// 把所有命中的区块按 SECTIONS 顺序渲染成 VitePress 提示框
+function buildSectionBlocks(content) {
+  return SECTIONS.map(sec => {
+    const text = parseSection(content, sec.names)
+    return text ? `::: ${sec.container} ${sec.title}\n${text}\n:::\n\n` : ''
+  }).join('')
 }
 
 function walkMd(dir) {
@@ -253,9 +284,9 @@ for (const file of files) {
   const tags = [label, ...customTags].filter((t, i, a) => a.indexOf(t) === i)
   const tagsYaml = tags.map(t => `  - ${t}`).join('\n')
 
-  // 题目（从注释提取）；代码默认展开规则：Python 展开，其它语言收起
-  const problem = parseProblemFromComments(content)
-  const problemBlock = problem ? `::: tip 题目\n${problem}\n:::\n\n` : ''
+  // 注释区块（题目/错误处/遗忘处/延展…，全由 SECTIONS 驱动）
+  const sectionBlocks = buildSectionBlocks(content)
+  // 代码默认展开规则：Python 展开，其它语言收起
   const openAttr = language === 'python' ? ' open' : ''
 
   // 2a) 独立 Monaco HTML 页 → docs/public/code-pages/<dir>/<slug>.html
@@ -284,7 +315,7 @@ import { withBase } from 'vitepress'
 
 > 由 \`source/${file}\` 自动生成 · ${label}
 
-${problemBlock}<details class="code-fold"${openAttr}>
+${sectionBlocks}<details class="code-fold"${openAttr}>
 <summary>📄 显示 / 隐藏代码</summary>
 
 <iframe :src="withBase('${htmlRel}')" width="100%" height="${height}px" style="border:1px solid #3c3c3c;border-radius:8px" title="${file} - Monaco Editor"></iframe>
