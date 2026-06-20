@@ -3,7 +3,9 @@ title: Greeter
 date: 2026-06-20
 tags:
   - Java
-  - 代码
+  - 入门
+  - 循环
+  - demo
 source: Greeter.java
 ---
 

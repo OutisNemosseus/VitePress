@@ -41,6 +41,20 @@ const prettify = name =>
 const slugify = name =>
   name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
+// 从源文件头部注释里读关键词，生成标签。
+// 支持任意注释符号（# // *）后写：tags / 标签 / keywords / 关键词，分隔符可用 , ， 、 空格
+// 例：  # tags: 算法, 单调栈, 双指针      //  // keywords: recursion sorting
+function parseTagsFromComments(content) {
+  const head = content.split('\n').slice(0, 20).join('\n')
+  const m = head.match(/(?:#|\/\/|\*|--)\s*(?:tags|标签|keywords|关键词)\s*[:：]\s*(.+)/i)
+  if (!m) return []
+  return m[1]
+    .replace(/\*\/\s*$/, '')          // 去掉块注释结尾 */
+    .split(/[,，、;；\s]+/)
+    .map(s => s.trim())
+    .filter(Boolean)
+}
+
 function walkMd(dir) {
   if (!fs.existsSync(dir)) return []
   const out = []
@@ -134,6 +148,11 @@ for (const file of files) {
   const lineCount = content.split('\n').length
   const height = Math.min(Math.max(lineCount * 19 + 140, 320), 820)
 
+  // 标签 = 语言名 + 注释里手写的关键词（去重）
+  const customTags = parseTagsFromComments(content)
+  const tags = [label, ...customTags].filter((t, i, a) => a.indexOf(t) === i)
+  const tagsYaml = tags.map(t => `  - ${t}`).join('\n')
+
   // 2a) 独立 Monaco HTML 页 → docs/public/code-pages/<dir>/<slug>.html
   const htmlDir = path.join(CODE_PAGES_DIR, dir)
   fs.mkdirSync(htmlDir, { recursive: true })
@@ -148,8 +167,7 @@ for (const file of files) {
 title: ${prettify(base)}
 date: ${today()}
 tags:
-  - ${label}
-  - 代码
+${tagsYaml}
 source: ${file}
 ---
 

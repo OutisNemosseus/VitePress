@@ -30,7 +30,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div id="editor"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
 <script>
-const CODE="public class Greeter {\n    public static void main(String[] args) {\n        for (int i = 0; i < 3; i++) {\n            System.out.println(\"Hello from Java! \" + i);\n        }\n    }\n}\n";
+const CODE="// tags: 入门, 循环, demo\npublic class Greeter {\n    public static void main(String[] args) {\n        for (int i = 0; i < 3; i++) {\n            System.out.println(\"Hello from Java! \" + i);\n        }\n    }\n}\n";
 const FILENAME="Greeter.java";
 document.getElementById('lines').textContent=CODE.split('\n').length+' lines';
 require.config({paths:{vs:'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs'}});

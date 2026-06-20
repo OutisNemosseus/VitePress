@@ -3,7 +3,6 @@ title: Quicksort
 date: 2026-06-20
 tags:
   - Python
-  - 代码
 source: quicksort.py
 ---
 

@@ -3,7 +3,6 @@ title: Strategy Pattern
 date: 2026-06-20
 tags:
   - Python
-  - 代码
 source: strategy_pattern.py
 ---
 

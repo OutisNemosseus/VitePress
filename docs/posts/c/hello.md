@@ -3,7 +3,6 @@ title: Hello
 date: 2026-06-20
 tags:
   - C
-  - 代码
 source: hello.c
 ---
 
