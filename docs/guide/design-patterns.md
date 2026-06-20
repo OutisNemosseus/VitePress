@@ -233,19 +233,20 @@ registerAction({ id:'share', cls:'btn-dl', label:'Share',
 
 ```js
 const SECTIONS = [
-  { names: '题目|题|problem|question',   title: '题目',   container: 'tip' },
-  { names: '错误|错误处|踩坑|mistake|bug', title: '错误处', container: 'warning' },
-  { names: '遗忘|遗忘处|易忘|forgot',     title: '遗忘处', container: 'danger' },
-  { names: '延展|拓展|相关|related',       title: '延展',   container: 'info' },
+  { names: '题目|题|problem|question',   title: '题目',   container: 'tip',     collapse: false },
+  { names: '错误|错误处|踩坑|mistake|bug', title: '错误处', container: 'warning', collapse: true },
+  { names: '遗忘|遗忘处|易忘|forgot',     title: '遗忘处', container: 'danger', collapse: true },
+  { names: '延展|拓展|相关|related',       title: '延展',   container: 'info',    collapse: false },
 
   // 👇 想加“复杂度”？只要加这一行：
-  { names: '复杂度|complexity', title: '复杂度', container: 'info' },
+  { names: '复杂度|complexity', title: '复杂度', container: 'info', collapse: false },
 ]
 ```
 
 - `names`：在注释里能触发它的关键词（`|` 分隔，大小写不限）
 - `title`：渲染出来的标题
 - `container`：颜色样式 `tip`(绿) / `warning`(黄) / `danger`(红) / `info`(灰)
+- `collapse`：`true` = 渲染成**默认收起**的折叠块（适合“错误处/遗忘处”这种先自测、想看时再点开）；`false` = 普通常开提示框
 
 然后源文件注释里直接写就行（单行或多行都支持）：
 

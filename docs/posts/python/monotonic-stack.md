@@ -22,13 +22,19 @@ import { withBase } from 'vitepress'
 接雨水 —— 给定每个柱子的高度，求下雨后能接住多少单位的水。
 :::
 
-::: warning 错误处
-弹栈后忘了判断栈是否为空，导致 stack[-1] 越界。
-:::
+<details class="section-fold section-warning">
+<summary>错误处</summary>
 
-::: danger 遗忘处
+弹栈后忘了判断栈是否为空，导致 stack[-1] 越界。
+
+</details>
+
+<details class="section-fold section-danger">
+<summary>遗忘处</summary>
+
 width = i - left - 1 里的 -1 容易漏掉。
-:::
+
+</details>
 
 ::: info 延展
 类似题——柱状图中最大的矩形、每日温度、下一个更大元素。

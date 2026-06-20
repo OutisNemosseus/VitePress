@@ -53,11 +53,12 @@ const TAG_NAMES = 'tags|标签|keywords|关键词'
 //   names     ：可触发该区块的关键词（| 分隔，大小写不限）
 //   title     ：渲染出来的标题
 //   container ：VitePress 容器样式 tip(绿) / warning(黄) / danger(红) / info(灰)
+//   collapse  ：true = 渲染成默认【收起】的折叠块（适合错误处/遗忘处这类“先自测再看答案”）
 const SECTIONS = [
-  { names: '题目|题|problem|question', title: '题目',   container: 'tip' },
-  { names: '错误|错误处|踩坑|mistake|bug', title: '错误处', container: 'warning' },
-  { names: '遗忘|遗忘处|易忘|forgot', title: '遗忘处', container: 'danger' },
-  { names: '延展|拓展|相关|相关题|related', title: '延展',   container: 'info' }
+  { names: '题目|题|problem|question', title: '题目',   container: 'tip',     collapse: false },
+  { names: '错误|错误处|踩坑|mistake|bug', title: '错误处', container: 'warning', collapse: true },
+  { names: '遗忘|遗忘处|易忘|forgot', title: '遗忘处', container: 'danger', collapse: true },
+  { names: '延展|拓展|相关|相关题|related', title: '延展',   container: 'info',    collapse: false }
 ]
 
 // 所有指令名合集——用于判断“某行是不是另一条指令”，从而界定区块边界
@@ -105,7 +106,12 @@ function parseTagsFromComments(content) {
 function buildSectionBlocks(content) {
   return SECTIONS.map(sec => {
     const text = parseSection(content, sec.names)
-    return text ? `::: ${sec.container} ${sec.title}\n${text}\n:::\n\n` : ''
+    if (!text) return ''
+    // collapse=true → 默认收起的折叠块；否则普通彩色提示框
+    if (sec.collapse) {
+      return `<details class="section-fold section-${sec.container}">\n<summary>${sec.title}</summary>\n\n${text}\n\n</details>\n\n`
+    }
+    return `::: ${sec.container} ${sec.title}\n${text}\n:::\n\n`
   }).join('')
 }
 

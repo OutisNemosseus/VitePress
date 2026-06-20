@@ -44,6 +44,46 @@
   color: #fff;
 }
 
+/* 可折叠的注释区块（错误处/遗忘处等，默认收起），配色对齐 VitePress 提示框 */
+.section-fold {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 8px 20px;
+  margin: 16px 0;
+}
+.section-fold > summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+  user-select: none;
+  padding: 8px 0;
+}
+.section-fold > summary::-webkit-details-marker { display: none; }
+.section-fold > summary::before { content: '▸ '; }
+.section-fold[open] > summary::before { content: '▾ '; }
+.section-fold[open] > summary { margin-bottom: 4px; }
+
+.section-tip {
+  background: var(--vp-custom-block-tip-bg);
+  border-color: var(--vp-custom-block-tip-border);
+  color: var(--vp-custom-block-tip-text);
+}
+.section-warning {
+  background: var(--vp-custom-block-warning-bg);
+  border-color: var(--vp-custom-block-warning-border);
+  color: var(--vp-custom-block-warning-text);
+}
+.section-danger {
+  background: var(--vp-custom-block-danger-bg);
+  border-color: var(--vp-custom-block-danger-border);
+  color: var(--vp-custom-block-danger-text);
+}
+.section-info {
+  background: var(--vp-custom-block-info-bg);
+  border-color: var(--vp-custom-block-info-border);
+}
+.section-fold > summary { color: inherit; }
+
 /* 代码折叠块：把 <summary> 做成按钮 */
 .code-fold {
   margin: 16px 0;
