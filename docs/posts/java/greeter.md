@@ -8,11 +8,11 @@ source: Greeter.java
 ---
 
 <script setup>
-const code = "public class Greeter {\n    public static void main(String[] args) {\n        for (int i = 0; i < 3; i++) {\n            System.out.println(\"Hello from Java! \" + i);\n        }\n    }\n}\n"
+import { withBase } from 'vitepress'
 </script>
 
 # Greeter
 
 > 由 `source/Greeter.java` 自动生成 · Java
 
-<MonacoViewer :code="code" language="java" filename="Greeter.java" />
+<iframe :src="withBase('/code-pages/java/greeter.html')" width="100%" height="320px" style="border:1px solid #3c3c3c;border-radius:8px" title="Greeter.java - Monaco Editor"></iframe>

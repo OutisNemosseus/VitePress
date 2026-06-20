@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Greeter.java</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1e1e1e;color:#d4d4d4}
+.header{background:#252526;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #3c3c3c;gap:12px;flex-wrap:wrap}
+.filename{font-size:.95rem;font-weight:600;color:#fff}
+.file-type{display:inline-block;padding:2px 8px;background:#0e639c;color:#fff;border-radius:4px;font-size:.72rem;font-weight:600;margin-left:8px}
+.lines{font-size:.75rem;color:#808080;margin-left:8px}
+.actions{display:flex;gap:8px}
+.btn{padding:6px 14px;border:none;border-radius:6px;font-size:.8rem;font-weight:500;cursor:pointer;color:#fff}
+.btn-copy{background:#0e639c}.btn-copy:hover{background:#1177bb}.btn-copy.copied{background:#16825d}
+.btn-dl{background:#10b981}.btn-dl:hover{background:#059669}
+#editor{height:calc(100vh - 52px)}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><span class="filename">Greeter.java</span><span class="file-type">Java</span><span class="lines" id="lines"></span></div>
+  <div class="actions">
+    <button class="btn btn-copy" id="copyBtn" onclick="copyCode()">Copy</button>
+    <button class="btn btn-dl" onclick="downloadCode()">Download</button>
+  </div>
+</div>
+<div id="editor"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+<script>
+const CODE="public class Greeter {\n    public static void main(String[] args) {\n        for (int i = 0; i < 3; i++) {\n            System.out.println(\"Hello from Java! \" + i);\n        }\n    }\n}\n";
+const FILENAME="Greeter.java";
+document.getElementById('lines').textContent=CODE.split('\n').length+' lines';
+require.config({paths:{vs:'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs'}});
+require(['vs/editor/editor.main'],function(){
+  monaco.editor.create(document.getElementById('editor'),{
+    value:CODE,language:'java',theme:'vs-dark',readOnly:true,automaticLayout:true,
+    fontSize:14,lineNumbers:'on',minimap:{enabled:true},scrollBeyondLastLine:false,
+    padding:{top:14,bottom:14},folding:true,bracketPairColorization:{enabled:true}
+  });
+});
+function copyCode(){navigator.clipboard.writeText(CODE).then(()=>{const b=document.getElementById('copyBtn');b.classList.add('copied');b.textContent='Copied!';setTimeout(()=>{b.classList.remove('copied');b.textContent='Copy';},1500);});}
+function downloadCode(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([CODE],{type:'text/plain'}));a.download=FILENAME;a.click();}
+</script>
+</body>
+</html>
