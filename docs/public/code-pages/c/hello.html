@@ -54,6 +54,8 @@ require(['vs/editor/editor.main'],function(){
     padding:{top:14,bottom:14},folding:true,bracketPairColorization:{enabled:true}
   });
   ED.onDidChangeModelContent(()=>{document.getElementById('lines').textContent=ED.getValue().split('\n').length+' lines';});
+  // Ctrl/Cmd + Enter 运行（仅 Python 页有 runCode）
+  ED.addCommand(monaco.KeyMod.CtrlCmd|monaco.KeyCode.Enter,function(){if(typeof runCode==='function')runCode();});
 });
 function current(){return ED?ED.getValue():CODE;}
 function copyCode(){navigator.clipboard.writeText(current()).then(()=>{const b=document.getElementById('copyBtn');b.classList.add('copied');b.textContent='Copied!';setTimeout(()=>{b.classList.remove('copied');b.textContent='Copy';},1500);});}

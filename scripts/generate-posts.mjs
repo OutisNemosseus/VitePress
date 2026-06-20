@@ -74,7 +74,7 @@ function buildMonacoHtml(filename, code, lang, label) {
   const isPython = lang === 'python'
   const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v0.26.2/full/'
   const runBtn = isPython
-    ? `<button class="btn btn-run" id="runBtn" onclick="runCode()">&#9654; Run</button>`
+    ? `<button class="btn btn-run" id="runBtn" onclick="runCode()" title="Ctrl+Enter">&#9654; Run (Ctrl+Enter)</button>`
     : ''
   const outputPanel = isPython
     ? `<div id="output">
@@ -105,6 +105,8 @@ async function runCode(){
     setOut('');
     var write=s=>appendOut(s.endsWith('\\n')?s:s+'\\n');
     py.setStdout({batched:write});py.setStderr({batched:write});
+    // input() 支持：弹窗输入一行，并回显到输出
+    py.setStdin({stdin:()=>{var r=window.prompt('input():');if(r===null)return '';appendOut('> '+r+'\\n');return r+'\\n';}});
     await py.runPythonAsync(current());
     if(!document.getElementById('outBody').textContent)appendOut('(no output)');
   }catch(e){appendOut('\\n'+e);}
@@ -169,6 +171,8 @@ require(['vs/editor/editor.main'],function(){
     padding:{top:14,bottom:14},folding:true,bracketPairColorization:{enabled:true}
   });
   ED.onDidChangeModelContent(()=>{document.getElementById('lines').textContent=ED.getValue().split('\\n').length+' lines';});
+  // Ctrl/Cmd + Enter 运行（仅 Python 页有 runCode）
+  ED.addCommand(monaco.KeyMod.CtrlCmd|monaco.KeyCode.Enter,function(){if(typeof runCode==='function')runCode();});
 });
 function current(){return ED?ED.getValue():CODE;}
 function copyCode(){navigator.clipboard.writeText(current()).then(()=>{const b=document.getElementById('copyBtn');b.classList.add('copied');b.textContent='Copied!';setTimeout(()=>{b.classList.remove('copied');b.textContent='Copy';},1500);});}
