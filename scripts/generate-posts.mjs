@@ -87,6 +87,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn{padding:6px 14px;border:none;border-radius:6px;font-size:.8rem;font-weight:500;cursor:pointer;color:#fff}
 .btn-copy{background:#0e639c}.btn-copy:hover{background:#1177bb}.btn-copy.copied{background:#16825d}
 .btn-dl{background:#10b981}.btn-dl:hover{background:#059669}
+.btn-reset{background:#6b7280}.btn-reset:hover{background:#7c8493}
 #editor{height:calc(100vh - 52px)}
 </style>
 </head>
@@ -96,6 +97,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="actions">
     <button class="btn btn-copy" id="copyBtn" onclick="copyCode()">Copy</button>
     <button class="btn btn-dl" onclick="downloadCode()">Download</button>
+    <button class="btn btn-reset" onclick="resetCode()">Reset</button>
   </div>
 </div>
 <div id="editor"></div>
@@ -103,17 +105,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <script>
 const CODE=${codeJs};
 const FILENAME=${JSON.stringify(filename)};
+let ED=null;
 document.getElementById('lines').textContent=CODE.split('\\n').length+' lines';
 require.config({paths:{vs:'${MONACO}'}});
 require(['vs/editor/editor.main'],function(){
-  monaco.editor.create(document.getElementById('editor'),{
-    value:CODE,language:'${lang}',theme:'vs-dark',readOnly:true,automaticLayout:true,
+  ED=monaco.editor.create(document.getElementById('editor'),{
+    value:CODE,language:'${lang}',theme:'vs-dark',readOnly:false,automaticLayout:true,
     fontSize:14,lineNumbers:'on',minimap:{enabled:true},scrollBeyondLastLine:false,
     padding:{top:14,bottom:14},folding:true,bracketPairColorization:{enabled:true}
   });
+  ED.onDidChangeModelContent(()=>{document.getElementById('lines').textContent=ED.getValue().split('\\n').length+' lines';});
 });
-function copyCode(){navigator.clipboard.writeText(CODE).then(()=>{const b=document.getElementById('copyBtn');b.classList.add('copied');b.textContent='Copied!';setTimeout(()=>{b.classList.remove('copied');b.textContent='Copy';},1500);});}
-function downloadCode(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([CODE],{type:'text/plain'}));a.download=FILENAME;a.click();}
+function current(){return ED?ED.getValue():CODE;}
+function copyCode(){navigator.clipboard.writeText(current()).then(()=>{const b=document.getElementById('copyBtn');b.classList.add('copied');b.textContent='Copied!';setTimeout(()=>{b.classList.remove('copied');b.textContent='Copy';},1500);});}
+function downloadCode(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([current()],{type:'text/plain'}));a.download=FILENAME;a.click();}
+function resetCode(){if(ED)ED.setValue(CODE);}
 <\/script>
 </body>
 </html>`
