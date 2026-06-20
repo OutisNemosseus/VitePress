@@ -16,7 +16,9 @@
       "Bash(curl -s https://OutisNemosseus.github.io/VitePress/)",
       "Bash(git fetch *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://OutisNemosseus.github.io/VitePress/posts/python/quicksort.html)",
-      "Bash(curl -s https://OutisNemosseus.github.io/VitePress/posts/python/quicksort.html)"
+      "Bash(curl -s https://OutisNemosseus.github.io/VitePress/posts/python/quicksort.html)",
+      "Bash(curl -s https://OutisNemosseus.github.io/VitePress/posts/monotonic-stack.html)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }

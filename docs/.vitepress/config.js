@@ -17,7 +17,7 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '指南', link: '/guide/' },
-      { text: '文章', link: '/posts/monotonic-stack' },
+      { text: '文章', link: '/posts/python/monotonic-stack' },
       { text: '标签', link: '/tags' }
     ],
     sidebar: {
