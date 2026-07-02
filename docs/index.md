@@ -16,8 +16,11 @@ hero:
 features:
   - title: Python
     details: Python 学习笔记
+    link: /posts/python/monotonic-stack
   - title: 设计模式
     details: 设计模式实践
+    link: /guide/design-patterns
   - title: 算法
     details: 算法题解
+    link: /tags?tag=算法
 ---
