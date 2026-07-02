@@ -1,6 +1,6 @@
 ---
 title: Strategy Pattern
-date: 2026-06-20
+date: 2026-07-02
 tags:
   - Python
 source: strategy_pattern.py
