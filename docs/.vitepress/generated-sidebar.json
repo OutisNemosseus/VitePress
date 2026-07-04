@@ -4,6 +4,18 @@
     "collapsed": false,
     "items": [
       {
+        "text": "LC200Wrong1",
+        "link": "/posts/python/lc200wrong1"
+      },
+      {
+        "text": "LC200Wrong1Problems",
+        "link": "/posts/python/lc200wrong1problems"
+      },
+      {
+        "text": "LC200Wrong1Try1",
+        "link": "/posts/python/lc200wrong1try1"
+      },
+      {
         "text": "Monotonic Stack",
         "link": "/posts/python/monotonic-stack"
       },
