@@ -286,7 +286,7 @@ async function aiCompleteSections(filePath, content, ext) {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${_orKey}`, 'Content-Type': 'application/json',
         'HTTP-Referer': 'https://outisnemosseus.github.io/VitePress/', 'X-Title': 'Code Notes' },
-      body: JSON.stringify({ model: 'meta-llama/llama-3.1-8b-instruct:free',
+      body: JSON.stringify({ model: 'google/gemma-2-9b-it:free',
         messages: [{ role: 'user', content: prompt }], max_tokens: 300 })
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
