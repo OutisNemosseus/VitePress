@@ -1,6 +1,6 @@
 ---
 title: Greeter
-date: 2026-07-02
+date: 2026-07-04
 tags:
   - Java
   - 入门
@@ -16,6 +16,8 @@ import { withBase } from 'vitepress'
 # Greeter
 
 > 由 `source/Greeter.java` 自动生成 · Java
+
+<a :href="withBase('/code-pages/java/greeter.html')" target="_blank" rel="noopener" class="code-newtab-btn">↗ 在新标签页打开编辑器</a>
 
 <details class="code-fold">
 <summary>📄 显示 / 隐藏代码</summary>

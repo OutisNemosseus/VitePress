@@ -1,6 +1,6 @@
 ---
 title: Monotonic Stack
-date: 2026-07-02
+date: 2026-07-04
 tags:
   - Python
   - 算法
@@ -39,6 +39,8 @@ width = i - left - 1 里的 -1 容易漏掉。
 ::: info 延展
 类似题——柱状图中最大的矩形、每日温度、下一个更大元素。
 :::
+
+<a :href="withBase('/code-pages/python/monotonic-stack.html')" target="_blank" rel="noopener" class="code-newtab-btn">↗ 在新标签页打开编辑器</a>
 
 <details class="code-fold" open>
 <summary>📄 显示 / 隐藏代码</summary>

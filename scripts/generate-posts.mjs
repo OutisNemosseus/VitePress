@@ -174,6 +174,7 @@ registerAction({id:'run',cls:'btn-run',label:'&#9654; Run (Ctrl+Enter)',title:'C
 <\/script>`
     : ''
 
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -224,7 +225,13 @@ require(['vs/editor/editor.main'],function(){
     fontSize:14,lineNumbers:'on',minimap:{enabled:true},scrollBeyondLastLine:false,
     padding:{top:14,bottom:14},folding:true,bracketPairColorization:{enabled:true}
   });
-  ED.onDidChangeModelContent(()=>{document.getElementById('lines').textContent=ED.getValue().split('\\n').length+' lines';});
+  ED.onDidChangeModelContent(()=>{
+    var v=ED.getValue();
+    document.getElementById('lines').textContent=v.split('\\n').length+' lines';
+    localStorage.setItem('cc-'+FILENAME,v);
+  });
+  var _saved=localStorage.getItem('cc-'+FILENAME);
+  if(_saved!==null){ED.setValue(_saved);document.getElementById('lines').textContent=_saved.split('\\n').length+' lines';}
   // Ctrl/Cmd + Enter 运行（仅 Python 页有 runCode）
   ED.addCommand(monaco.KeyMod.CtrlCmd|monaco.KeyCode.Enter,function(){if(typeof runCode==='function')runCode();});
   mountActions();
@@ -248,12 +255,52 @@ function mountActions(){
 }
 // 核心按钮（业务回调只管自己的事，与骨架解耦）
 registerAction({id:'copy',cls:'btn-copy',label:'Copy',run:function(ctx){navigator.clipboard.writeText(ctx.getCode()).then(function(){ctx.btn.classList.add('copied');ctx.btn.textContent='Copied!';setTimeout(function(){ctx.btn.classList.remove('copied');ctx.btn.textContent='Copy';},1500);});}});
-registerAction({id:'download',cls:'btn-dl',label:'Download',run:function(ctx){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ctx.getCode()],{type:'text/plain'}));a.download=FILENAME;a.click();}});
-registerAction({id:'reset',cls:'btn-reset',label:'Reset',run:function(ctx){ctx.setCode(CODE);}});
+registerAction({id:'download',cls:'btn-dl',label:'Download',run:function(ctx){var name=window.prompt('保存文件名：',FILENAME);if(name===null)return;if(!name.trim())name=FILENAME;var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ctx.getCode()],{type:'text/plain'}));a.download=name.trim();a.click();}});
+registerAction({id:'reset',cls:'btn-reset',label:'Reset',run:function(ctx){ctx.setCode(CODE);localStorage.removeItem('cc-'+FILENAME);}});
 <\/script>
 ${pyScript}
 </body>
 </html>`
+}
+
+// ============================================================
+// AI 构建时补全（读取 .openrouter-key，不存在则跳过）
+// ============================================================
+let _orKey = ''
+try { _orKey = fs.readFileSync(path.join(root, '.openrouter-key'), 'utf8').trim() } catch {}
+
+async function aiCompleteSections(filePath, content, ext) {
+  if (!_orKey) return content
+  const cc = ext === '.py' ? '#' : '//'
+  const has = kws => kws.split('|').some(k => content.toLowerCase().includes(k.toLowerCase().trim()))
+  const need = []
+  if (!has('tags|标签|keywords|关键词')) need.push(`${cc} tags: <2-5个中文标签，如：算法, 并查集>`)
+  if (!has('题目|problem|question'))     need.push(`${cc} 题目: <一句话说明这段代码解决什么问题>`)
+  if (!has('错误|错误处|踩坑|mistake|bug')) need.push(`${cc} 错误: <写这类代码时一个常见错误>`)
+  if (!has('遗忘|遗忘处|易忘|forgot'))   need.push(`${cc} 遗忘: <容易忘记的一个细节>`)
+  if (!has('延展|拓展|相关|related'))    need.push(`${cc} 延展: <相关题目或延伸方向>`)
+  if (!need.length) return content
+  const prompt = `分析以下代码，只输出下列注释行，不要任何解释，用中文填写尖括号内容：\n${need.join('\n')}\n\n代码：\n${content.slice(0, 3000)}`
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${_orKey}`, 'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://outisnemosseus.github.io/VitePress/', 'X-Title': 'Code Notes' },
+      body: JSON.stringify({ model: 'meta-llama/llama-3.1-8b-instruct:free',
+        messages: [{ role: 'user', content: prompt }], max_tokens: 300 })
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data = await res.json()
+    const text = (data.choices?.[0]?.message?.content || '').trim()
+    if (text) {
+      const patched = text + '\n' + content
+      fs.writeFileSync(filePath, patched, 'utf8')
+      return patched
+    }
+  } catch (e) {
+    console.warn(`  ⚠ AI 补全失败 (${path.basename(filePath)}): ${e.message}`)
+  }
+  return content
 }
 
 fs.mkdirSync(SOURCE_DIR, { recursive: true })
@@ -281,7 +328,9 @@ for (const file of files) {
   if (usedSlugs.has(`${dir}/${slug}`)) slug = `${slug}-${ext.slice(1)}`
   usedSlugs.add(`${dir}/${slug}`)
 
-  const content = fs.readFileSync(path.join(SOURCE_DIR, file), 'utf8')
+  const srcPath = path.join(SOURCE_DIR, file)
+  let content = fs.readFileSync(srcPath, 'utf8')
+  content = await aiCompleteSections(srcPath, content, ext)
   const lineCount = content.split('\n').length
   const height = Math.min(Math.max(lineCount * 24 + 700, 700), 1600)
 
@@ -321,7 +370,9 @@ import { withBase } from 'vitepress'
 
 > 由 \`source/${file}\` 自动生成 · ${label}
 
-${sectionBlocks}<details class="code-fold"${openAttr}>
+${sectionBlocks}<a :href="withBase('${htmlRel}')" target="_blank" rel="noopener" class="code-newtab-btn">↗ 在新标签页打开编辑器</a>
+
+<details class="code-fold"${openAttr}>
 <summary>📄 显示 / 隐藏代码</summary>
 
 <iframe :src="withBase('${htmlRel}')" width="100%" height="${height}px" style="border:1px solid #3c3c3c;border-radius:8px" title="${file} - Monaco Editor"></iframe>

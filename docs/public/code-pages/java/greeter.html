@@ -48,7 +48,13 @@ require(['vs/editor/editor.main'],function(){
     fontSize:14,lineNumbers:'on',minimap:{enabled:true},scrollBeyondLastLine:false,
     padding:{top:14,bottom:14},folding:true,bracketPairColorization:{enabled:true}
   });
-  ED.onDidChangeModelContent(()=>{document.getElementById('lines').textContent=ED.getValue().split('\n').length+' lines';});
+  ED.onDidChangeModelContent(()=>{
+    var v=ED.getValue();
+    document.getElementById('lines').textContent=v.split('\n').length+' lines';
+    localStorage.setItem('cc-'+FILENAME,v);
+  });
+  var _saved=localStorage.getItem('cc-'+FILENAME);
+  if(_saved!==null){ED.setValue(_saved);document.getElementById('lines').textContent=_saved.split('\n').length+' lines';}
   // Ctrl/Cmd + Enter 运行（仅 Python 页有 runCode）
   ED.addCommand(monaco.KeyMod.CtrlCmd|monaco.KeyCode.Enter,function(){if(typeof runCode==='function')runCode();});
   mountActions();
@@ -72,8 +78,8 @@ function mountActions(){
 }
 // 核心按钮（业务回调只管自己的事，与骨架解耦）
 registerAction({id:'copy',cls:'btn-copy',label:'Copy',run:function(ctx){navigator.clipboard.writeText(ctx.getCode()).then(function(){ctx.btn.classList.add('copied');ctx.btn.textContent='Copied!';setTimeout(function(){ctx.btn.classList.remove('copied');ctx.btn.textContent='Copy';},1500);});}});
-registerAction({id:'download',cls:'btn-dl',label:'Download',run:function(ctx){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ctx.getCode()],{type:'text/plain'}));a.download=FILENAME;a.click();}});
-registerAction({id:'reset',cls:'btn-reset',label:'Reset',run:function(ctx){ctx.setCode(CODE);}});
+registerAction({id:'download',cls:'btn-dl',label:'Download',run:function(ctx){var name=window.prompt('保存文件名：',FILENAME);if(name===null)return;if(!name.trim())name=FILENAME;var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ctx.getCode()],{type:'text/plain'}));a.download=name.trim();a.click();}});
+registerAction({id:'reset',cls:'btn-reset',label:'Reset',run:function(ctx){ctx.setCode(CODE);localStorage.removeItem('cc-'+FILENAME);}});
 </script>
 
 </body>

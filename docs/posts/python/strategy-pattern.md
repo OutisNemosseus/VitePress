@@ -1,6 +1,6 @@
 ---
 title: Strategy Pattern
-date: 2026-07-02
+date: 2026-07-04
 tags:
   - Python
 source: strategy_pattern.py
@@ -13,6 +13,8 @@ import { withBase } from 'vitepress'
 # Strategy Pattern
 
 > 由 `source/strategy_pattern.py` 自动生成 · Python
+
+<a :href="withBase('/code-pages/python/strategy-pattern.html')" target="_blank" rel="noopener" class="code-newtab-btn">↗ 在新标签页打开编辑器</a>
 
 <details class="code-fold" open>
 <summary>📄 显示 / 隐藏代码</summary>

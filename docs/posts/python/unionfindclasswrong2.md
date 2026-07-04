@@ -1,6 +1,6 @@
 ---
 title: UnionFindClassWrong2
-date: 2026-07-02
+date: 2026-07-04
 tags:
   - Python
 source: UnionFindClassWrong2.py
@@ -13,6 +13,8 @@ import { withBase } from 'vitepress'
 # UnionFindClassWrong2
 
 > 由 `source/UnionFindClassWrong2.py` 自动生成 · Python
+
+<a :href="withBase('/code-pages/python/unionfindclasswrong2.html')" target="_blank" rel="noopener" class="code-newtab-btn">↗ 在新标签页打开编辑器</a>
 
 <details class="code-fold" open>
 <summary>📄 显示 / 隐藏代码</summary>

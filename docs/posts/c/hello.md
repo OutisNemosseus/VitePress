@@ -1,6 +1,6 @@
 ---
 title: Hello
-date: 2026-07-02
+date: 2026-07-04
 tags:
   - C
   - 入门
@@ -21,6 +21,8 @@ import { withBase } from 'vitepress'
 ::: tip 题目
 用 for 循环打印三次问候语，熟悉 printf 与计数循环。
 :::
+
+<a :href="withBase('/code-pages/c/hello.html')" target="_blank" rel="noopener" class="code-newtab-btn">↗ 在新标签页打开编辑器</a>
 
 <details class="code-fold">
 <summary>📄 显示 / 隐藏代码</summary>
