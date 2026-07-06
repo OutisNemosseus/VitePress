@@ -1,6 +1,6 @@
 ---
 title: UnionFindClassWrong2
-date: 2026-07-04
+date: 2026-07-06
 tags:
   - Python
 source: UnionFindClassWrong2.py
