@@ -4,6 +4,14 @@
     "collapsed": false,
     "items": [
       {
+        "text": "Dijkstra2677Wrong2",
+        "link": "/posts/python/dijkstra2677wrong2"
+      },
+      {
+        "text": "Dijkstrea2677Wrong1",
+        "link": "/posts/python/dijkstrea2677wrong1"
+      },
+      {
         "text": "LC133",
         "link": "/posts/python/lc133"
       },
@@ -42,6 +50,22 @@
       {
         "text": "Strategy Pattern",
         "link": "/posts/python/strategy-pattern"
+      },
+      {
+        "text": "Toposort2677Wrong1.Py",
+        "link": "/posts/python/toposort2677wrong1-py"
+      },
+      {
+        "text": "UnionFind2677Wrong1",
+        "link": "/posts/python/unionfind2677wrong1"
+      },
+      {
+        "text": "UnionFind2677Wrong2",
+        "link": "/posts/python/unionfind2677wrong2"
+      },
+      {
+        "text": "UnionFind2677Wrong3C",
+        "link": "/posts/python/unionfind2677wrong3c"
       },
       {
         "text": "UnionFIndClassWrong1",

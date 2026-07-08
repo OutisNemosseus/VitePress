@@ -1,6 +1,6 @@
 ---
 title: LC200Wrong1Try1
-date: 2026-07-06
+date: 2026-07-08
 tags:
   - Python
 source: LC200Wrong1Try1.py

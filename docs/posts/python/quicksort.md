@@ -1,6 +1,6 @@
 ---
 title: Quicksort
-date: 2026-07-06
+date: 2026-07-08
 tags:
   - Python
 source: quicksort.py
