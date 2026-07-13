@@ -1,6 +1,6 @@
 ---
 title: UnionfindDIct2
-date: 2026-07-08
+date: 2026-07-12
 tags:
   - Python
 source: UnionfindDIct2.py

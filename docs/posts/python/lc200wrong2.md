@@ -1,6 +1,6 @@
 ---
 title: LC200Wrong2
-date: 2026-07-08
+date: 2026-07-12
 tags:
   - Python
 source: LC200Wrong2.py

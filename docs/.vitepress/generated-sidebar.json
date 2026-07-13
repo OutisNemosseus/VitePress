@@ -16,6 +16,26 @@
         "link": "/posts/python/lc133"
       },
       {
+        "text": "LC1330712",
+        "link": "/posts/python/lc1330712"
+      },
+      {
+        "text": "LC1330712Wrong",
+        "link": "/posts/python/lc1330712wrong"
+      },
+      {
+        "text": "LC133D0712",
+        "link": "/posts/python/lc133d0712"
+      },
+      {
+        "text": "LC2000711Wrong",
+        "link": "/posts/python/lc2000711wrong"
+      },
+      {
+        "text": "LC200D0712",
+        "link": "/posts/python/lc200d0712"
+      },
+      {
         "text": "LC200Dict",
         "link": "/posts/python/lc200dict"
       },
@@ -54,6 +74,10 @@
       {
         "text": "Toposort2677Wrong1.Py",
         "link": "/posts/python/toposort2677wrong1-py"
+      },
+      {
+        "text": "Tposort0712Wrong",
+        "link": "/posts/python/tposort0712wrong"
       },
       {
         "text": "UnionFind2677Wrong1",

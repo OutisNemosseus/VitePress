@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC1330712Wrong.py</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1e1e1e;color:#d4d4d4}
+.header{background:#252526;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #3c3c3c;gap:12px;flex-wrap:wrap}
+.filename{font-size:.95rem;font-weight:600;color:#fff}
+.file-type{display:inline-block;padding:2px 8px;background:#0e639c;color:#fff;border-radius:4px;font-size:.72rem;font-weight:600;margin-left:8px}
+.lines{font-size:.75rem;color:#808080;margin-left:8px}
+.actions{display:flex;gap:8px}
+.btn{padding:6px 14px;border:none;border-radius:6px;font-size:.8rem;font-weight:500;cursor:pointer;color:#fff}
+.btn-copy{background:#0e639c}.btn-copy:hover{background:#1177bb}.btn-copy.copied{background:#16825d}
+.btn-dl{background:#10b981}.btn-dl:hover{background:#059669}
+.btn-reset{background:#6b7280}.btn-reset:hover{background:#7c8493}
+.btn-run{background:#7c3aed}.btn-run:hover{background:#8b5cf6}
+.btn:disabled{opacity:.6;cursor:default}
+body{display:flex;flex-direction:column}
+.header{flex:0 0 auto}
+#editor{flex:1 1 auto;min-height:0}
+#output{display:none;flex-direction:column;height:140px;flex:0 0 auto;border-top:1px solid #3c3c3c;background:#1e1e1e}
+.out-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:#252526;border-bottom:1px solid #3c3c3c;font-size:.8rem;color:#cbd5e1}
+.out-clear{background:#374151;color:#fff;border:none;border-radius:4px;padding:3px 10px;font-size:.75rem;cursor:pointer}
+#outBody{margin:0;padding:12px 16px;overflow:auto;flex:1;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;white-space:pre-wrap;color:#d4d4d4}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><span class="filename">LC1330712Wrong.py</span><span class="file-type">Python</span><span class="lines" id="lines"></span></div>
+  <div class="actions"></div>
+</div>
+<div id="editor"></div>
+<div id="output">
+  <div class="out-bar"><span>Output</span><button class="out-clear" onclick="clearOut()">Clear</button></div>
+  <pre id="outBody"></pre>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+<script>
+const CODE="";
+const FILENAME="LC1330712Wrong.py";
+let ED=null;
+document.getElementById('lines').textContent=CODE.split('\n').length+' lines';
+require.config({paths:{vs:'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs'}});
+require(['vs/editor/editor.main'],function(){
+  ED=monaco.editor.create(document.getElementById('editor'),{
+    value:CODE,language:'python',theme:'vs-dark',readOnly:false,automaticLayout:true,
+    fontSize:14,lineNumbers:'on',minimap:{enabled:true},scrollBeyondLastLine:false,
+    padding:{top:14,bottom:14},folding:true,bracketPairColorization:{enabled:true}
+  });
+  ED.onDidChangeModelContent(()=>{
+    var v=ED.getValue();
+    document.getElementById('lines').textContent=v.split('\n').length+' lines';
+    localStorage.setItem('cc-'+FILENAME,v);
+  });
+  var _saved=localStorage.getItem('cc-'+FILENAME);
+  if(_saved!==null){ED.setValue(_saved);document.getElementById('lines').textContent=_saved.split('\n').length+' lines';}
+  // Ctrl/Cmd + Enter 运行（仅 Python 页有 runCode）
+  ED.addCommand(monaco.KeyMod.CtrlCmd|monaco.KeyCode.Enter,function(){if(typeof runCode==='function')runCode();});
+  mountActions();
+});
+function getCode(){return ED?ED.getValue():CODE;}
+function setCode(v){if(ED)ED.setValue(v);}
+// ===== 按钮「稳定骨架」：注册表 + 统一挂载。日后加按钮只需 registerAction({...}) 一行 =====
+const ACTIONS=[];
+function registerAction(a){ACTIONS.push(a);}
+function mountActions(){
+  var box=document.querySelector('.actions');box.innerHTML='';
+  ACTIONS.forEach(function(a){
+    var b=document.createElement('button');
+    b.className='btn '+(a.cls||'');
+    if(a.id)b.id=a.id+'Btn';
+    if(a.title)b.title=a.title;
+    b.innerHTML=a.label;
+    b.addEventListener('click',function(){a.run({btn:b,getCode:getCode,setCode:setCode,editor:ED});});
+    box.appendChild(b);
+  });
+}
+// 核心按钮（业务回调只管自己的事，与骨架解耦）
+registerAction({id:'copy',cls:'btn-copy',label:'Copy',run:function(ctx){navigator.clipboard.writeText(ctx.getCode()).then(function(){ctx.btn.classList.add('copied');ctx.btn.textContent='Copied!';setTimeout(function(){ctx.btn.classList.remove('copied');ctx.btn.textContent='Copy';},1500);});}});
+registerAction({id:'download',cls:'btn-dl',label:'Download',run:function(ctx){var name=window.prompt('保存文件名：',FILENAME);if(name===null)return;if(!name.trim())name=FILENAME;var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ctx.getCode()],{type:'text/plain'}));a.download=name.trim();a.click();}});
+registerAction({id:'reset',cls:'btn-reset',label:'Reset',run:function(ctx){ctx.setCode(CODE);localStorage.removeItem('cc-'+FILENAME);}});
+</script>
+<script>
+const PYODIDE='https://cdn.jsdelivr.net/pyodide/v0.26.2/full/';
+let pyReady=null;
+function showOut(){document.getElementById('output').style.display='flex';if(ED)ED.layout();}
+function setOut(t){document.getElementById('outBody').textContent=t;}
+function appendOut(t){var o=document.getElementById('outBody');o.textContent+=t;o.scrollTop=o.scrollHeight;}
+function clearOut(){setOut('');}
+function ensurePy(){
+  if(pyReady)return pyReady;
+  showOut();setOut('\u23F3 Loading Python runtime (first run downloads ~10MB)...');
+  pyReady=new Promise((res,rej)=>{var s=document.createElement('script');s.src=PYODIDE+'pyodide.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);})
+    .then(()=>loadPyodide({indexURL:PYODIDE}));
+  return pyReady;
+}
+async function runCode(){
+  var b=document.getElementById('runBtn');b.disabled=true;var t=b.textContent;b.textContent='Running...';
+  showOut();
+  try{
+    var py=await ensurePy();
+    setOut('');
+    var write=s=>appendOut(s.endsWith('\n')?s:s+'\n');
+    py.setStdout({batched:write});py.setStderr({batched:write});
+    // input() 支持：弹窗输入一行，并回显到输出
+    py.setStdin({stdin:()=>{var r=window.prompt('input():');if(r===null)return '';appendOut('> '+r+'\n');return r+'\n';}});
+    await py.runPythonAsync(getCode());
+    if(!document.getElementById('outBody').textContent)appendOut('(no output)');
+  }catch(e){appendOut('\n'+e);}
+  finally{b.disabled=false;b.textContent=t;}
+}
+// 注册「运行」按钮（解耦：只需在这里加一条）
+registerAction({id:'run',cls:'btn-run',label:'&#9654; Run (Ctrl+Enter)',title:'Ctrl+Enter',run:function(){runCode();}});
+</script>
+</body>
+</html>
